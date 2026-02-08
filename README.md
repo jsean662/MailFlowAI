@@ -29,22 +29,32 @@ This project is built using a modern, combined stack to ensure performance, scal
 
 ```mermaid
 graph TD
-    A[Start] --> B{User Logged In?}
+    A[Start App] --> B{User Authenticated?}
+
     B -- No --> C[Login Page]
-    C --> D[Google OAuth]
-    D --> E[Redirect to App]
-    B -- Yes --> F[Inbox]
-    F --> G{User Action}
-    G -- View Email --> H[Email Detail]
-    G -- Compose --> I[Compose Modal]
-    G -- Search/Filter --> F
-    I --> J{AI Assistance?}
-    J -- Yes --> K[Copilot Draft]
-    K --> I
-    I --> L[Send Email]
-    L --> M[Confirmation Dialog]
-    M -- Confirm --> N[Email Sent]
-    M -- Cancel --> I
+    C --> D[Google OAuth Consent Screen]
+    D --> E[Backend OAuth Callback]
+    E --> F[Store Tokens in SQLite]
+    F --> G[Redirect to Frontend Inbox]
+
+    B -- Yes --> H[Inbox View]
+
+    H --> I{User Action}
+
+    I -- Open Email --> J[Email Detail View]
+
+    I -- Compose Email --> K[Compose Page]
+
+    I -- Search / Filter --> L[Call Gmail Search API]
+    L --> H[Inbox Updates with Results]
+
+    K --> M{Assistant Action?}
+    M -- Yes --> N[CopilotKit Triggers UI Fill Action]
+    N --> K
+
+    K --> O[User Confirms Send]
+    O --> P[Backend POST /gmail/send]
+    P --> Q[Email Sent Successfully]
 ```
 
 ### Email Interaction Flow
@@ -56,18 +66,19 @@ sequenceDiagram
     participant Backend
     participant GmailAPI
 
-    User->>Frontend: Click Email
-    Frontend->>Backend: GET /emails/{id}
-    Backend->>GmailAPI: Users.messages.get
+    User->>Frontend: Click Email in Inbox
+    Frontend->>Backend: GET /api/gmail/messages/{id}
+    Backend->>GmailAPI: users.messages.get
     GmailAPI-->>Backend: Email Data
     Backend-->>Frontend: Email Detail JSON
     Frontend-->>User: Display Email Content
 
     User->>Frontend: Click Reply
-    Frontend->>User: Open Reply Form
-    User->>Frontend: Type Reply & Click Send
-    Frontend->>Backend: POST /emails/{id}/reply
-    Backend->>GmailAPI: Users.messages.send
+    Frontend-->>User: Open Compose Page (Prefilled Draft)
+
+    User->>Frontend: Click Send
+    Frontend->>Backend: POST /api/gmail/send
+    Backend->>GmailAPI: users.messages.send
     GmailAPI-->>Backend: Sent Message Object
     Backend-->>Frontend: Success Response
     Frontend-->>User: Show Success Notification

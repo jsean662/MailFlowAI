@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
                         <div className="bg-orange-500 p-2 border-2 border-black shadow-brutal-sm">
                             <Mail className="h-6 w-6 text-black" />
                         </div>
-                        <h1 className="text-xl font-display font-bold uppercase tracking-wider">MailFlow</h1>
+                        <h1 className="text-xl font-display font-bold uppercase tracking-wide">MailFlow.AI</h1>
                     </div>
                     {/* Close button for mobile */}
                     <button onClick={onClose} className="md:hidden p-1 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded">

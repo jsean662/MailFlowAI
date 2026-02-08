@@ -77,11 +77,11 @@ sequenceDiagram
 
 ### Inbox View
 The central hub for your emails, featuring a clean list view, search, and quick filters.
-![Inbox View](/Users/jaysawant/.gemini/antigravity/brain/24ffb96b-58c0-4ba5-9c4e-6ef0251931d9/inbox_blurred_1770577040424.png)
+![Inbox View](assets/inbox_blurred_1770577040424.png)
 
 ### Email Detail View
 A focused view for reading and interacting with individual emails, with options to reply, forward, or delete.
-![Email Detail View](/Users/jaysawant/.gemini/antigravity/brain/24ffb96b-58c0-4ba5-9c4e-6ef0251931d9/email_detail_blurred_1770577070429.png)
+![Email Detail View](assets/email_detail_blurred_1770577070429.png)
 
 ## ⚖️ Trade-offs & Future Improvements
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.services.token_service import TokenService
 from app.services.gmail_service import GmailService
-from app.schemas.email import EmailPreview, SendEmailRequest, EmailDetail, PaginatedEmails
+from app.schemas.email import EmailPreview, SendEmailRequest, EmailDetail, PaginatedEmails, ReplyEmailRequest, ForwardEmailRequest
 from app.core.config import settings
 from app.core.cache import cache_response
 
@@ -29,7 +29,7 @@ def get_gmail_service(db: Session = Depends(get_db)) -> GmailService:
         raise HTTPException(status_code=401, detail={"error": "AUTH_FAILED", "message": str(e)})
 
 @router.get("/inbox", response_model=PaginatedEmails)
-@cache_response(ttl_seconds=300)
+@cache_response(ttl_seconds=2)
 def get_inbox(page_token: str = Query(None), service: GmailService = Depends(get_gmail_service)):
     return service.list_inbox_emails(page_token=page_token)
 
@@ -52,3 +52,18 @@ def send_email(request: SendEmailRequest, service: GmailService = Depends(get_gm
 @cache_response(ttl_seconds=300)
 def search_emails(q: str = Query(..., description="Gmail search query"), service: GmailService = Depends(get_gmail_service)):
     return service.search_emails(q)
+
+@router.post("/messages/{message_id}/reply")
+def reply_email(message_id: str, request: ReplyEmailRequest, service: GmailService = Depends(get_gmail_service)):
+    service.reply_email(message_id, request.body)
+    return {"status": "sent"}
+
+@router.post("/messages/{message_id}/forward")
+def forward_email(message_id: str, request: ForwardEmailRequest, service: GmailService = Depends(get_gmail_service)):
+    service.forward_email(message_id, request.to, request.body)
+    return {"status": "sent"}
+
+@router.delete("/messages/{message_id}")
+def delete_email(message_id: str, service: GmailService = Depends(get_gmail_service)):
+    service.delete_email(message_id)
+    return {"status": "deleted"}

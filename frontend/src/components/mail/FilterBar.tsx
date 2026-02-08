@@ -3,6 +3,7 @@ import { useMailStore } from '../../store/mailStore';
 import { SlidersHorizontal } from 'lucide-react';
 import { Input } from '../common/Input';
 import { Button } from '../common/Button';
+import { useClickAnimation } from '../../hooks/useClickAnimation';
 
 export const FilterBar: React.FC = () => {
     const {
@@ -15,6 +16,7 @@ export const FilterBar: React.FC = () => {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = React.useRef<HTMLDivElement>(null);
+    const { isPressed: isTogglePressed, trigger: handleToggleClick } = useClickAnimation(() => setIsDropdownOpen(!isDropdownOpen));
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -49,11 +51,11 @@ export const FilterBar: React.FC = () => {
                     />
                     <button
                         type="button"
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        onClick={handleToggleClick}
                         className={`absolute right-1 top-1/2 -translate-y-1/2 h-[calc(100%-8px)] px-2 transition-all flex items-center justify-center ${isDropdownOpen
                             ? 'bg-black text-white dark:bg-white dark:text-black border-l-2 border-black'
                             : 'text-gray-400 hover:text-black dark:text-gray-400 dark:hover:text-white border-l-2 border-transparent hover:border-black/5'
-                            }`}
+                            } ${isTogglePressed ? 'translate-x-[2px] translate-y-[2px] shadow-none origin-center' : ''}`}
                         title="Show search options"
                     >
                         <SlidersHorizontal size={18} />
@@ -166,18 +168,19 @@ const FilterDropdownContent: React.FC<{ onClose: () => void }> = ({ onClose }) =
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t-2 border-black/10">
-                <button
+                <Button
                     onClick={() => { clearFilters(); onClose(); }}
-                    className="px-4 py-2 border-2 border-black font-display font-bold uppercase text-xs hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all text-black dark:text-white"
+                    variant="secondary"
+                    className="text-xs uppercase px-4 py-2 border-2 border-black font-display font-bold"
                 >
                     Clear
-                </button>
-                <button
+                </Button>
+                <Button
                     onClick={() => { applySearchAndFilters(); onClose(); }}
-                    className="px-4 py-2 bg-black text-white dark:bg-white dark:text-black border-2 border-black font-display font-bold uppercase text-xs hover:bg-orange-500 hover:text-white transition-all shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                    className="px-4 py-2 bg-black text-white px-4 py-2 bg-black text-white dark:bg-white dark:text-black hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 font-display font-bold uppercase text-xs"
                 >
                     Apply
-                </button>
+                </Button>
             </div>
         </div>
     );

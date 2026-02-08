@@ -27,3 +27,10 @@ class EmailDetail(BaseModel):
 class PaginatedEmails(BaseModel):
     messages: List[EmailPreview]
     nextPageToken: Optional[str] = None
+
+class ReplyEmailRequest(BaseModel):
+    body: str
+
+class ForwardEmailRequest(BaseModel):
+    to: List[EmailStr]
+    body: str

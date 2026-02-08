@@ -14,10 +14,25 @@ export const Button: React.FC<ButtonProps> = ({
     variant = 'primary',
     size = 'md',
     fullWidth = false,
+    onClick,
     ...props
 }) => {
+    const [isPressed, setIsPressed] = React.useState(false);
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        // Trigger animation
+        setIsPressed(true);
+        setTimeout(() => setIsPressed(false), 150);
+
+        // Call original onClick handler
+        if (onClick) {
+            onClick(e);
+        }
+    };
+
     return (
         <button
+            onClick={handleClick}
             className={twMerge(
                 clsx(
                     // Base styles
@@ -37,6 +52,10 @@ export const Button: React.FC<ButtonProps> = ({
                     // Full width
                     {
                         'w-full': fullWidth,
+                    },
+                    // Programmatic animation state (overrides base styles when active)
+                    {
+                        'translate-x-[2px] translate-y-[2px] shadow-none': isPressed,
                     }
                 ),
                 className

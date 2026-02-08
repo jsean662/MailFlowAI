@@ -17,7 +17,15 @@ export interface SendEmailPayload {
     body: string;
 }
 
-export interface PaginatedResponse {
-    messages: EmailPreview[];
-    nextPageToken: string | null;
+messages: EmailPreview[];
+nextPageToken: string | null;
+}
+
+export interface ReplyEmailPayload {
+    body: string;
+}
+
+export interface ForwardEmailPayload {
+    to: string[];
+    body: string;
 }

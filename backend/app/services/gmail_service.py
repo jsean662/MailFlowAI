@@ -213,3 +213,58 @@ class GmailService:
                 unread='UNREAD' in m['labelIds']
             ))
         return previews
+
+    def reply_email(self, original_message_id: str, body: str):
+        """Reply to an email."""
+        # Get original email to find threadId and headers
+        original = self.service.users().messages().get(userId='me', id=original_message_id, format='metadata').execute()
+        thread_id = original['threadId']
+        headers = original['payload']['headers']
+        
+        subject = self._parse_header(headers, 'Subject')
+        if not subject.lower().startswith('re:'):
+            subject = f"Re: {subject}"
+            
+        # Should reply to Reply-To if present, else From
+        reply_to = self._parse_header(headers, 'Reply-To')
+        if not reply_to:
+            reply_to = self._parse_header(headers, 'From')
+            
+        # Get Message-ID to set In-Reply-To and References
+        message_id_header = self._parse_header(headers, 'Message-ID')
+        references = self._parse_header(headers, 'References')
+        
+        message = MIMEText(body)
+        message['to'] = reply_to
+        message['subject'] = subject
+        
+        if message_id_header:
+            message['In-Reply-To'] = message_id_header
+            message['References'] = f"{references} {message_id_header}" if references else message_id_header
+            
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
+        body = {
+            'raw': raw_message,
+            'threadId': thread_id
+        }
+        
+        self.service.users().messages().send(userId='me', body=body).execute()
+
+
+    def forward_email(self, original_message_id: str, to: list[str], body: str):
+        """Forward an email."""
+        # Get original email content to include in body or attachment (simplest is inline body for now)
+        original_detail = self.get_email_detail(original_message_id)
+        
+        forward_body = f"{body}\n\n---------- Forwarded message ---------\nFrom: {original_detail.sender}\nDate: {original_detail.date}\nSubject: {original_detail.subject}\n\n{original_detail.body}"
+        
+        subject = original_detail.subject
+        if not subject.lower().startswith('fwd:'):
+             subject = f"Fwd: {subject}"
+             
+        self.send_email(to, subject, forward_body)
+
+
+    def delete_email(self, message_id: str):
+        """Move email to trash."""
+        self.service.users().messages().trash(userId='me', id=message_id).execute()

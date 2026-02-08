@@ -6,7 +6,6 @@ export const useMailSync = (intervalMs: number = 10000) => {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            console.log('Checking for new emails...');
             checkNewEmails();
         }, intervalMs);
 

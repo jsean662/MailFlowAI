@@ -1,5 +1,5 @@
 import { apiClient as client } from './client';
-import type { EmailPreview, EmailDetail, SendEmailPayload, PaginatedResponse } from '../types/email';
+import type { EmailPreview, EmailDetail, SendEmailPayload, PaginatedResponse, ReplyEmailPayload, ForwardEmailPayload } from '../types/email';
 import type { UserProfile } from '../types/user';
 import { env } from '../config/env';
 
@@ -47,6 +47,18 @@ export const gmailApi = {
 
     sendEmail: async (payload: SendEmailPayload): Promise<void> => {
         await client.post('/gmail/send', payload);
+    },
+
+    reply: async (id: string, payload: ReplyEmailPayload): Promise<void> => {
+        await client.post(`/gmail/messages/${id}/reply`, payload);
+    },
+
+    forward: async (id: string, payload: ForwardEmailPayload): Promise<void> => {
+        await client.post(`/gmail/messages/${id}/forward`, payload);
+    },
+
+    delete: async (id: string): Promise<void> => {
+        await client.delete(`/gmail/messages/${id}`);
     },
 
     searchEmails: async (query: string): Promise<EmailPreview[]> => {

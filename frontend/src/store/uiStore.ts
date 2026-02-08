@@ -13,6 +13,15 @@ interface UIState {
     notification: { message: string; type: 'info' | 'success' | 'error' } | null;
     showNotification: (message: string, type?: 'info' | 'success' | 'error') => void;
     clearNotification: () => void;
+
+    // Navigation Intent (for Copilot)
+    navigationTarget: string | null;
+    setNavigationTarget: (path: string | null) => void;
+
+    // Actions requesting full draft set
+    setComposeDraft: (draft: ComposeDraft) => void;
+    openComposePage: () => void;
+    replyToCurrentEmail: (email: any) => void; // Using any to avoid circular type dependency for now, or I'll import proper type
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -62,4 +71,23 @@ export const useUIStore = create<UIState>((set, get) => ({
     },
 
     clearNotification: () => set({ notification: null }),
+
+    navigationTarget: null,
+    setNavigationTarget: (path) => set({ navigationTarget: path }),
+
+    setComposeDraft: (draft) => set({ composeDraft: draft }),
+
+    openComposePage: () => set({ navigationTarget: '/compose' }),
+
+    replyToCurrentEmail: (email: any) => {
+        if (!email) return;
+        set({
+            composeDraft: {
+                to: email.sender,
+                subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
+                body: `\n\n> ${email.body || ''}`,
+            },
+            navigationTarget: '/compose',
+        });
+    },
 }));

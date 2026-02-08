@@ -4,6 +4,7 @@ import { useMailStore } from '../../store/mailStore';
 import { EmailListItem } from './EmailListItem';
 import { Loader } from '../common/Loader';
 import { FilterBar } from './FilterBar';
+import { Button } from '../common/Button';
 
 interface EmailListProps {
     type: 'inbox' | 'sent';
@@ -43,9 +44,8 @@ export const EmailList: React.FC<EmailListProps> = ({ type }) => {
     useEffect(() => {
         if (!type) return;
 
-        // Only fetch if empty or user specifically refreshes (handled by UI)
-        // But for now auto-fetch on mount if empty
-        if (type === 'inbox' && inboxEmails.length === 0 && !isLoading) fetchInbox();
+        // Always fetch on mount if type is inbox to ensure we have fresh data and snapshot
+        if (type === 'inbox' && !isLoading) fetchInbox();
         if (type === 'sent' && sentEmails.length === 0 && !isLoading) fetchSent();
     }, [type, fetchInbox, fetchSent]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -94,27 +94,27 @@ export const EmailList: React.FC<EmailListProps> = ({ type }) => {
                         {/* Pagination Controls */}
                         {!searchResults && (
                             <div className="flex justify-center items-center space-x-6 pt-8 pb-4">
-                                <button
+                                <Button
                                     onClick={handlePrev}
                                     disabled={currentPage <= 1}
-                                    className="px-6 py-2 bg-white text-black border-2 border-black shadow-brutal text-sm font-bold uppercase tracking-wider hover:bg-orange-500 hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-black disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-brutal flex items-center group/btn"
+                                    className="px-6 py-2 bg-white text-black hover:bg-orange-500 hover:text-white disabled:hover:bg-white disabled:hover:text-black flex items-center group/btn"
                                 >
                                     <ArrowLeft size={16} className="mr-2 opacity-0 -translate-x-2 transition-all group-hover/btn:opacity-100 group-hover/btn:translate-x-0" />
                                     <span>Previous</span>
-                                </button>
+                                </Button>
 
                                 <div className="px-4 py-2 bg-black text-off-white font-display font-bold border-2 border-black transform min-w-[100px] text-center">
                                     Page {currentPage}
                                 </div>
 
-                                <button
+                                <Button
                                     onClick={handleNext}
                                     disabled={!hasNextPage}
-                                    className="px-6 py-2 bg-white text-black border-2 border-black shadow-brutal text-sm font-bold uppercase tracking-wider hover:bg-orange-500 hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-black disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-brutal flex items-center group/btn"
+                                    className="px-6 py-2 bg-white text-black hover:bg-orange-500 hover:text-white disabled:hover:bg-white disabled:hover:text-black flex items-center group/btn"
                                 >
                                     <span>Next</span>
                                     <ArrowRight size={16} className="ml-2 opacity-0 translate-x-2 transition-all group-hover/btn:opacity-100 group-hover/btn:translate-x-0" />
-                                </button>
+                                </Button>
                             </div>
                         )}
                     </>

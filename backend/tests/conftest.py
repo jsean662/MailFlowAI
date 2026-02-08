@@ -1,4 +1,13 @@
 import pytest
+import os
+
+# Set dummy env vars for testing before importing app modules
+os.environ["GOOGLE_CLIENT_ID"] = "test_client_id"
+os.environ["GOOGLE_CLIENT_SECRET"] = "test_client_secret"
+os.environ["GOOGLE_REDIRECT_URI"] = "http://localhost:8000/callback"
+os.environ["FRONTEND_URL"] = "http://localhost:3000"
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

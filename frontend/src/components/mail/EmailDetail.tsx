@@ -9,7 +9,38 @@ import { Button } from '../common/Button';
 export const EmailDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { selectedEmail, openEmail, isLoading, error } = useMailStore();
+    const { selectedEmail, openEmail, isLoading, error, deleteEmail, replyToEmail, forwardEmail } = useMailStore();
+
+    const [action, setAction] = React.useState<'none' | 'reply' | 'forward'>('none');
+    const [body, setBody] = React.useState('');
+    const [forwardTo, setForwardTo] = React.useState('');
+    const [isSending, setIsSending] = React.useState(false);
+
+    const handleAction = async () => {
+        if (!selectedEmail) return;
+        setIsSending(true);
+        try {
+            if (action === 'reply') {
+                await replyToEmail(selectedEmail.id, body);
+            } else if (action === 'forward') {
+                await forwardEmail(selectedEmail.id, [forwardTo], body);
+            }
+            alert('Sent successfully!');
+            setAction('none');
+            setBody('');
+            setForwardTo('');
+        } catch (e) {
+            alert('Failed to send');
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedEmail || !confirm('Are you sure you want to delete this email?')) return;
+        await deleteEmail(selectedEmail.id);
+        navigate(-1);
+    };
 
     useEffect(() => {
         if (id) {
@@ -36,11 +67,58 @@ export const EmailDetail: React.FC = () => {
                     <ArrowLeft size={16} /> Back
                 </Button>
                 <div className="flex gap-2">
-                    <Button variant="secondary" size="sm">Reply</Button>
-                    <Button variant="secondary" size="sm">Forward</Button>
-                    <Button variant="danger" size="sm">Delete</Button>
+                    <Button
+                        variant={action === 'reply' ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => setAction(action === 'reply' ? 'none' : 'reply')}
+                    >
+                        Reply
+                    </Button>
+                    <Button
+                        variant={action === 'forward' ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => setAction(action === 'forward' ? 'none' : 'forward')}
+                    >
+                        Forward
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={handleDelete}>Delete</Button>
                 </div>
             </div>
+
+
+
+            {/* Action Area */}
+            {
+                action !== 'none' && (
+                    <div className="mb-6 p-4 bg-gray-100 dark:bg-zinc-900 border-2 border-black">
+                        <h3 className="font-bold mb-2 capitalize">{action} to Email</h3>
+
+                        {action === 'forward' && (
+                            <input
+                                type="email"
+                                placeholder="To (email address)"
+                                className="w-full mb-2 p-2 border-2 border-black"
+                                value={forwardTo}
+                                onChange={e => setForwardTo(e.target.value)}
+                            />
+                        )}
+
+                        <textarea
+                            className="w-full h-32 p-2 border-2 border-black mb-2"
+                            placeholder="Type your message..."
+                            value={body}
+                            onChange={e => setBody(e.target.value)}
+                        />
+
+                        <div className="flex justify-end gap-2">
+                            <Button variant="secondary" onClick={() => setAction('none')}>Cancel</Button>
+                            <Button onClick={handleAction} disabled={isSending}>
+                                {isSending ? 'Sending...' : 'Send'}
+                            </Button>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Email Content Card */}
             <article className="bg-white dark:bg-zinc-800 border-2 border-black p-8 shadow-brutal-lg relative">
@@ -74,6 +152,6 @@ export const EmailDetail: React.FC = () => {
                     />
                 </div>
             </article>
-        </div>
+        </div >
     );
 };

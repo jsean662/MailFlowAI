@@ -54,6 +54,14 @@ interface MailState {
     setFilters: (filters: Partial<MailState['filters']>) => void;
     applySearchAndFilters: () => Promise<void>;
     clearFilters: () => Promise<void>;
+    // User Profile
+    userProfile: { name: string; email: string } | null;
+    setUserProfile: (profile: { name: string; email: string }) => void;
+
+    // Actions
+    deleteEmail: (id: string) => Promise<void>;
+    replyToEmail: (id: string, body: string) => Promise<void>;
+    forwardEmail: (id: string, to: string[], body: string) => Promise<void>;
 }
 
 export const useMailStore = create<MailState>((set, get) => ({
@@ -71,10 +79,8 @@ export const useMailStore = create<MailState>((set, get) => ({
     inboxSnapshot: [],
     newEmailsCount: 0,
     resetNewEmailsCount: () => {
-        const { inboxEmails } = get();
         set({
-            newEmailsCount: 0,
-            inboxSnapshot: inboxEmails
+            newEmailsCount: 0
         });
     },
 
@@ -235,20 +241,29 @@ export const useMailStore = create<MailState>((set, get) => ({
             const newEmails = data.messages.filter(e => !snapshotIds.has(e.id));
 
             if (newEmails.length > 0) {
-                // We found new emails!
-                // Update snapshot to the new list so we don't alert again for these
-                // Increment count
-                // Trigger notification
+                const isInboxView = state.inboxPage === 1 && !state.searchQuery;
 
-                useUIStore.getState().showNotification(
-                    `You have ${newEmails.length} new email${newEmails.length > 1 ? 's' : ''}`,
-                    'info'
-                );
+                if (isInboxView) {
+                    set((s) => ({
+                        inboxEmails: data.messages,
+                        inboxSnapshot: data.messages,
+                        newEmailsCount: 0,
+                        inboxNextPageToken: data.nextPageToken,
+                        inboxTokens: { ...s.inboxTokens, 2: data.nextPageToken }
+                    }));
+                } else {
+                    useUIStore.getState().showNotification(
+                        `You have ${newEmails.length} new email${newEmails.length > 1 ? 's' : ''}`,
+                        'info'
+                    );
 
-                set((s) => ({
-                    newEmailsCount: s.newEmailsCount + newEmails.length,
-                    inboxSnapshot: data.messages
-                }));
+                    set((s) => ({
+                        newEmailsCount: s.newEmailsCount + newEmails.length,
+                        inboxSnapshot: data.messages
+                    }));
+                }
+            } else {
+                set({ inboxSnapshot: data.messages });
             }
         } catch (error) {
             console.error('Failed to check for new emails', error);
@@ -321,11 +336,10 @@ export const useMailStore = create<MailState>((set, get) => ({
         try {
             const results = await gmailApi.searchEmails(query);
             set({
-                inboxEmails: results,
+                // DO NOT OVERWRITE INBOX EMAILS!
+                searchResults: results,
                 searchQuery: query,
                 isLoading: false,
-                // When searching, we might lose pagination for now as per current requirements, 
-                // but we replace inboxEmails as requested.
             });
         } catch {
             set({ error: 'Failed to apply filters', isLoading: false });
@@ -342,8 +356,50 @@ export const useMailStore = create<MailState>((set, get) => ({
                 readStatus: 'all',
                 hasAttachment: false,
             },
-            searchQuery: null
+            searchQuery: null,
+            searchResults: null
         });
         await get().fetchInbox();
     },
+
+    userProfile: null,
+    setUserProfile: (profile) => set({ userProfile: profile }),
+
+    deleteEmail: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            await gmailApi.delete(id);
+            // Remove from list
+            set(state => ({
+                inboxEmails: state.inboxEmails.filter(e => e.id !== id),
+                sentEmails: state.sentEmails.filter(e => e.id !== id),
+                selectedEmail: state.selectedEmail?.id === id ? null : state.selectedEmail,
+                isLoading: false
+            }));
+        } catch {
+            set({ error: 'Failed to delete email', isLoading: false });
+        }
+    },
+
+    replyToEmail: async (id: string, body: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            await gmailApi.reply(id, { body });
+            set({ isLoading: false });
+        } catch {
+            set({ error: 'Failed to reply to email', isLoading: false });
+            throw new Error('Failed to reply');
+        }
+    },
+
+    forwardEmail: async (id: string, to: string[], body: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            await gmailApi.forward(id, { to, body });
+            set({ isLoading: false });
+        } catch {
+            set({ error: 'Failed to forward email', isLoading: false });
+            throw new Error('Failed to forward');
+        }
+    }
 }));

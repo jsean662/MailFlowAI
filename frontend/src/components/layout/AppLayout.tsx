@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { useMailSync } from '../../hooks/useMailSync';
+import { useMailStore } from '../../store/mailStore';
 import { Menu, Mail } from 'lucide-react';
 import { gmailApi } from '../../api/gmailApi';
 import { Loader } from '../common/Loader';
 import type { UserProfile } from '../../types/user';
 import { ThemeToggle } from './ThemeToggle';
 import { Notification as AppNotification } from './Notification';
+import { useCopilotIntegration } from '../../copilot/copilotContext';
+import { CopilotPopup } from "@copilotkit/react-ui";
 
 export const AppLayout: React.FC = () => {
+    useCopilotIntegration(); // Activate Copilot AI Actions
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +37,7 @@ export const AppLayout: React.FC = () => {
             try {
                 const profile = await gmailApi.getUserProfile();
                 setUserProfile(profile);
+                useMailStore.getState().setUserProfile(profile);
             } catch (error) {
                 console.error('Failed to fetch user profile:', error);
             }
@@ -88,9 +93,19 @@ export const AppLayout: React.FC = () => {
                     <Outlet />
                 </div>
 
-                {/* Floating Theme Toggle */}
-                <div className="fixed bottom-6 right-6 z-50">
+                {/* Floating Theme Toggle - Moved to top right */}
+                <div className="fixed top-24 right-6 z-50 md:top-6">
                     <ThemeToggle />
+                </div>
+
+                <div className="z-50 font-sans">
+                    <CopilotPopup
+                        instructions="You are a helpful email assistant. Use the available tools to help the user manage their inbox."
+                        labels={{
+                            title: "MailFlow AI",
+                            initial: "Hi! How can I help you with your email today?",
+                        }}
+                    />
                 </div>
             </main>
         </div>

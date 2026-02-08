@@ -5,6 +5,10 @@ import clsx from 'clsx';
 import type { UserProfile } from '../../types/user';
 import { gmailApi } from '../../api/gmailApi';
 import { useMailStore } from '../../store/mailStore';
+import { useClickAnimation } from '../../hooks/useClickAnimation';
+import { Button } from '../common/Button';
+
+import { ConfirmationModal } from '../common/ConfirmationModal';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -15,13 +19,21 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }) => {
     const navigate = useNavigate();
     const { newEmailsCount, resetNewEmailsCount } = useMailStore();
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
+
+    // Animation hook for Compose Link
+    const { isPressed: isComposePressed, trigger: handleComposeClick } = useClickAnimation(onClose);
 
     const navItems = [
         { name: 'Inbox', path: '/inbox', icon: Inbox, count: newEmailsCount },
         { name: 'Sent', path: '/sent', icon: Send },
     ];
 
-    const handleLogout = async () => {
+    const handleLogout = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const confirmLogout = async () => {
         try {
             await gmailApi.logout();
             navigate('/login');
@@ -39,6 +51,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
                     onClick={onClose}
                 />
             )}
+
+            <ConfirmationModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={confirmLogout}
+                title="Confirm Logout"
+                message="Are you sure you want to logout? You will need to sign in again to access your emails."
+                confirmText="Logout"
+                variant="warning"
+            />
 
             <aside className={clsx(
                 "fixed inset-y-0 left-0 z-50 w-64 bg-off-white dark:bg-zinc-900 border-r-3 border-black flex flex-col p-4 shadow-brutal-lg transition-transform duration-300 md:translate-x-0 md:relative md:h-full",
@@ -61,8 +83,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
                 {/* Compose Button - Prominent */}
                 <Link
                     to="/compose"
-                    onClick={onClose}
-                    className="mb-8 w-full flex items-center justify-center gap-2 bg-orange-500 text-black font-display font-bold py-3 px-4 border-2 border-black shadow-brutal hover:bg-orange-600 transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                    onClick={handleComposeClick}
+                    className={clsx(
+                        "mb-8 w-full flex items-center justify-center gap-2 bg-orange-500 text-black font-display font-bold py-3 px-4 border-2 border-black shadow-brutal hover:bg-orange-600 transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
+                        { "translate-x-[2px] translate-y-[2px] shadow-none": isComposePressed }
+                    )}
                 >
                     <Pencil size={20} />
                     <span>COMPOSE</span>
@@ -120,13 +145,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
                                     <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{userProfile.email}</div>
                                 </div>
                             </div>
-                            <button
+                            <Button
                                 onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-500 text-black font-display font-bold text-sm border-2 border-black shadow-brutal hover:bg-orange-600 transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                                fullWidth
+                                variant="primary" // Or custom styles if needed, but primary is orange which matches previous style? Wait, previous was orange.
+                                className="flex items-center justify-center gap-2 px-3 py-2 text-sm"
                             >
                                 <LogOut size={16} />
                                 <span className="uppercase">Logout</span>
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>

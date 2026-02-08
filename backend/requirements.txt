@@ -1,0 +1,22 @@
+fastapi
+uvicorn[standard]
+
+google-api-python-client
+google-auth
+google-auth-oauthlib
+
+sqlalchemy
+alembic
+
+pydantic
+pydantic-settings
+python-dotenv
+httpx
+email-validator
+beautifulsoup4
+
+# Testing
+pytest
+pytest-asyncio
+pytest-mock
+pytest-cov

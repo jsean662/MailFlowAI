@@ -19,7 +19,7 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({ email }) => {
         >
             <div className="flex justify-between items-start mb-2">
                 <h3 className={clsx(
-                    "text-lg font-display truncate pr-4 text-black dark:text-off-white",
+                    "text-lg font-display truncate pr-4 text-black dark:text-off-white sensitive-data",
                     email.unread ? "font-bold" : "font-normal"
                 )}>
                     {email.sender}
@@ -36,12 +36,12 @@ export const EmailListItem: React.FC<EmailListItemProps> = ({ email }) => {
             </div>
 
             <div className="mb-1">
-                <span className={clsx("text-md text-black dark:text-gray-300", email.unread ? "font-semibold" : "")}>
+                <span className={clsx("text-md text-black dark:text-gray-300 sensitive-data", email.unread ? "font-semibold" : "")}>
                     {email.subject}
                 </span>
             </div>
 
-            <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+            <p className="text-sm text-gray-500 truncate dark:text-gray-400 sensitive-data">
                 {email.snippet}
             </p>
 

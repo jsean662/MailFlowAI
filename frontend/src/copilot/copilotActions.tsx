@@ -23,9 +23,15 @@ export function useCopilotActions() {
     const { userProfile } = useMailStore();
 
     // 0. Provide Context to AI
+    const { selectedEmail } = useMailStore();
     useCopilotReadable({
         description: "The currently logged-in user's profile. Use this to sign emails correctly.",
         value: userProfile,
+    });
+
+    useCopilotReadable({
+        description: "The currently opened email that the user is viewing. Use this context when the user asks to reply to or forward the current email.",
+        value: selectedEmail,
     });
 
     // 1. Compose Email
@@ -150,15 +156,50 @@ export function useCopilotActions() {
     // 5. Reply to Current
     useCopilotAction({
         name: "reply_to_email",
-        description: "Reply to the email currently being viewed.",
-        parameters: [],
-        handler: async () => {
+        description: "Reply to the email currently being viewed. You can provide specific content for the reply to be pre-filled.",
+        parameters: [
+            {
+                name: "responseContent",
+                type: "string",
+                description: "The content of the reply message.",
+                required: false
+            }
+        ],
+        handler: async ({ responseContent }) => {
             const current = useMailStore.getState().selectedEmail;
             if (!current) {
                 return "No email is currently open to reply to.";
             }
-            useUIStore.getState().replyToCurrentEmail(current);
+            useUIStore.getState().replyToCurrentEmail(current, responseContent);
             return "Reply draft created.";
+        },
+    });
+
+    // 6. Forward Email
+    useCopilotAction({
+        name: "forward_email",
+        description: "Forward the email currently being viewed to another recipient.",
+        parameters: [
+            {
+                name: "to",
+                type: "string",
+                description: "The email address to forward to.",
+                required: true
+            },
+            {
+                name: "message",
+                type: "string",
+                description: "Optional message to include above the forwarded content.",
+                required: false
+            }
+        ],
+        handler: async ({ to, message }) => {
+            const current = useMailStore.getState().selectedEmail;
+            if (!current) {
+                return "No email is currently open to forward.";
+            }
+            useUIStore.getState().forwardCurrentEmail(current, message, to);
+            return "Forward draft created.";
         },
     });
 

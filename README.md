@@ -23,6 +23,12 @@ This project is built using a modern, combined stack to ensure performance, scal
 -   **Advanced Filtering**: Filter emails by date, attachment presence, and more.
 -   **Privacy-Focused**: Critical user data is handled securely, with confirmation steps for sensitive actions.
 
+## 🎥 Demo
+
+Watch MailFlowAI in action, showcasing the AI Copilot and seamless email management.
+
+![MailFlowAI Demo](assets/demo.webp)
+
 ## 🗺️ User Journeys
 
 ### Authentication & Inbox Flow

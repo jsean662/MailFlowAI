@@ -42,6 +42,14 @@
     text-shadow: 2px 2px 0px #F5F5F5;
   }
 
+  /* Privacy Mode for Demos */
+  .privacy-mode .sensitive-data {
+    filter: blur(5px);
+    user-select: none;
+    pointer-events: none;
+    /* Prevent accidental clicks on blurred content */
+  }
+
   /* Custom Scrollbar for a cleaner look */
   ::-webkit-scrollbar {
     width: 10px;

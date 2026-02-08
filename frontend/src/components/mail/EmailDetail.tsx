@@ -123,7 +123,7 @@ export const EmailDetail: React.FC = () => {
             {/* Email Content Card */}
             <article className="bg-white dark:bg-zinc-800 border-2 border-black p-8 shadow-brutal-lg relative">
                 {/* Subject */}
-                <h1 className="text-3xl font-display font-bold mb-6 text-black dark:text-off-white border-b-2 border-black pb-4">
+                <h1 className="text-3xl font-display font-bold mb-6 text-black dark:text-off-white border-b-2 border-black pb-4 sensitive-data">
                     {selectedEmail.subject}
                 </h1>
 
@@ -132,7 +132,7 @@ export const EmailDetail: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <UserCircle size={40} className="text-orange-500" />
                         <div>
-                            <span className="block font-bold text-black dark:text-white">{selectedEmail.sender}</span>
+                            <span className="block font-bold text-black dark:text-white sensitive-data">{selectedEmail.sender}</span>
                             <span className="text-xs font-mono">To: You</span>
                         </div>
                     </div>
@@ -147,7 +147,7 @@ export const EmailDetail: React.FC = () => {
                     {/* Using dangerouslySetInnerHTML if body is HTML, otherwise just text */}
                     {/* For safety in this demo we'll assume text or sanitized HTML */}
                     <div
-                        className="email-body"
+                        className="email-body sensitive-data"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedEmail.body) }}
                     />
                 </div>

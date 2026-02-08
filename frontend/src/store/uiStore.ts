@@ -21,7 +21,8 @@ interface UIState {
     // Actions requesting full draft set
     setComposeDraft: (draft: ComposeDraft) => void;
     openComposePage: () => void;
-    replyToCurrentEmail: (email: any) => void; // Using any to avoid circular type dependency for now, or I'll import proper type
+    replyToCurrentEmail: (email: any, additionalContent?: string) => void;
+    forwardCurrentEmail: (email: any, additionalContent?: string, to?: string) => void;
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -79,13 +80,25 @@ export const useUIStore = create<UIState>((set, get) => ({
 
     openComposePage: () => set({ navigationTarget: '/compose' }),
 
-    replyToCurrentEmail: (email: any) => {
+    replyToCurrentEmail: (email: any, additionalContent?: string) => {
         if (!email) return;
         set({
             composeDraft: {
                 to: email.sender,
                 subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
-                body: `\n\n> ${email.body || ''}`,
+                body: `${additionalContent ? additionalContent + '\n\n' : ''}\n\n> ${email.body || ''}`,
+            },
+            navigationTarget: '/compose',
+        });
+    },
+
+    forwardCurrentEmail: (email: any, additionalContent?: string, to?: string) => {
+        if (!email) return;
+        set({
+            composeDraft: {
+                to: to || '',
+                subject: email.subject.startsWith('Fwd:') ? email.subject : `Fwd: ${email.subject}`,
+                body: `${additionalContent ? additionalContent + '\n\n' : ''}---------- Forwarded message ---------\nFrom: ${email.sender}\nDate: ${email.date}\nSubject: ${email.subject}\n\n${email.body || ''}`,
             },
             navigationTarget: '/compose',
         });

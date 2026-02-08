@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
                                         <User className="h-5 w-5 text-black" />
                                     </div>
                                 )}
-                                <div className="flex-1 min-w-0">
+                                <div className="flex-1 min-w-0 sensitive-data">
                                     <div className="font-display font-bold text-sm truncate">{userProfile.name}</div>
                                     <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{userProfile.email}</div>
                                 </div>

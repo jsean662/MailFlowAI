@@ -206,7 +206,7 @@ export function useCopilotActions() {
     // 6. Filter Inbox
     useCopilotAction({
         name: "filter_inbox",
-        description: "Filter the inbox view by specific criteria like date, sender, or status.",
+        description: "Filter the inbox view. Usage: User can specify a duration (e.g. '3 days') and optionally a start date. If the user specifies a duration NOT in {1d, 3d, 7d, 14d, 1m, 2m, 6m, 1y} (e.g. '4 days'), you MUST explain that only specific durations are allowed and ask them to choose one, DO NOT guess.",
         parameters: [
             {
                 name: "readStatus",
@@ -216,7 +216,12 @@ export function useCopilotActions() {
             {
                 name: "dateRange",
                 type: "string",
-                description: "Time range: '1d', '3d', '7d', '14d', '1m', '2m', '6m', '1y'",
+                description: "Duration of the filter starting from the startDate. Examples: '1d', '3d', '4d', '7d', '14d', '1m', '2m'. Defaults to '1d' if not specified.",
+            },
+            {
+                name: "startDate",
+                type: "string",
+                description: "The start date for the filter in YYYY/MM/DD format. Defaults to today if not specified.",
             },
             {
                 name: "sender",
@@ -234,7 +239,7 @@ export function useCopilotActions() {
                 description: "Filter by having attachment",
             }
         ],
-        handler: async ({ readStatus, dateRange, sender, keyword, hasAttachment }) => {
+        handler: async ({ readStatus, dateRange, startDate, sender, keyword, hasAttachment }) => {
             const currentFilters = useMailStore.getState().filters;
 
             // Construct new filters
@@ -242,6 +247,7 @@ export function useCopilotActions() {
                 ...currentFilters,
                 ...(readStatus && { readStatus: readStatus as any }),
                 ...(dateRange && { dateRange: dateRange as any }),
+                ...(startDate && { dateCenter: startDate }), // Map startDate to dateCenter
                 ...(sender && { sender }),
                 ...(keyword && { keyword }),
                 ...(hasAttachment !== undefined && { hasAttachment })

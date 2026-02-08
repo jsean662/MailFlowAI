@@ -1,7 +1,7 @@
 export interface GmailFilters {
     keyword: string;
     sender: string;
-    dateRange: "all" | "1d" | "3d" | "7d" | "14d" | "1m" | "2m" | "6m" | "1y";
+    dateRange: string | "all";
     dateCenter: string;
     readStatus: "all" | "unread" | "read";
     hasAttachment: boolean;
@@ -26,16 +26,19 @@ export function buildGmailQuery(filters: GmailFilters): string {
         if (!isNaN(centerDate.getTime())) {
             const rangeInDays = getRangeInDays(filters.dateRange);
 
-            const startDate = new Date(centerDate);
-            startDate.setDate(startDate.getDate() - rangeInDays);
+            if (rangeInDays > 0) {
+                // dateCenter is now acting as Start Date
+                const startDate = new Date(centerDate);
 
-            const endDate = new Date(centerDate);
-            endDate.setDate(endDate.getDate() + rangeInDays);
+                // End Date = Start Date + Duration
+                const endDate = new Date(centerDate);
+                endDate.setDate(endDate.getDate() + rangeInDays);
 
-            const formatDate = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, '/');
+                const formatDate = (date: Date) => date.toISOString().split('T')[0].replace(/-/g, '/');
 
-            parts.push(`after:${formatDate(startDate)}`);
-            parts.push(`before:${formatDate(endDate)}`);
+                parts.push(`after:${formatDate(startDate)}`);
+                parts.push(`before:${formatDate(endDate)}`);
+            }
         } else {
             // Fallback to relative if dateCenter is somehow invalid
             parts.push(`newer_than:${filters.dateRange}`);
@@ -61,10 +64,14 @@ function getRangeInDays(range: string): number {
     const unit = range.slice(-1);
     const value = parseInt(range.slice(0, -1));
 
+    if (isNaN(value)) return -1;
+
+    if (isNaN(value)) return -1;
+
     switch (unit) {
-        case 'd': return value;
         case 'm': return value * 30;
         case 'y': return value * 365;
-        default: return 0;
+        case 'd': // Fallthrough
+        default: return value; // Assume days if unit is 'd' or unknown but value is present
     }
 }

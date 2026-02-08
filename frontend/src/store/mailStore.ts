@@ -28,7 +28,7 @@ interface MailState {
     filters: {
         keyword: string;
         sender: string;
-        dateRange: "all" | "1d" | "3d" | "7d" | "14d" | "1m" | "2m" | "6m" | "1y";
+        dateRange: string | "all";
         dateCenter: string;
         readStatus: "all" | "unread" | "read";
         hasAttachment: boolean;

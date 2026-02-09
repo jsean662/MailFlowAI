@@ -99,7 +99,8 @@ A focused view for reading and interacting with individual emails, with options 
 
 Watch MailFlowAI in action, showcasing the AI Copilot and seamless email management.
 
-![MailFlowAI Demo](assets/demo.webp)
+<video src="https://www.loom.com/share/7ac37d82cdb4430f8116a8f3f451c430" width="600" controls></video>
+
 
 ## ⚖️ Trade-offs & Future Improvements
 

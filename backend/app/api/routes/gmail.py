@@ -29,12 +29,10 @@ def get_gmail_service(db: Session = Depends(get_db)) -> GmailService:
         raise HTTPException(status_code=401, detail={"error": "AUTH_FAILED", "message": str(e)})
 
 @router.get("/inbox", response_model=PaginatedEmails)
-@cache_response(ttl_seconds=2)
 def get_inbox(page_token: str = Query(None), service: GmailService = Depends(get_gmail_service)):
     return service.list_inbox_emails(page_token=page_token)
 
 @router.get("/sent", response_model=PaginatedEmails)
-@cache_response(ttl_seconds=300)
 def get_sent(page_token: str = Query(None), service: GmailService = Depends(get_gmail_service)):
     return service.list_sent_emails(page_token=page_token)
 

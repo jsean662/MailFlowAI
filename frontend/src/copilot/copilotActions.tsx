@@ -81,7 +81,7 @@ export function useCopilotActions() {
                     body={currentDraft.body}
                     onConfirm={async () => {
                         if (!currentDraft.to || !currentDraft.subject) {
-                            respond("Error: Draft incomplete.");
+                            respond?.("Error: Draft incomplete.");
                             return;
                         }
 
@@ -94,13 +94,13 @@ export function useCopilotActions() {
 
                             clearDraft();
                             setNavigationTarget('/sent');
-                            respond("Email sent successfully.");
+                            respond?.("Email sent successfully.");
                         } catch (error) {
                             console.error("Failed to send email:", error);
-                            respond("Failed to send email. Please try again.");
+                            respond?.("Failed to send email. Please try again.");
                         }
                     }}
-                    onCancel={() => respond("Email sending cancelled by user.")}
+                    onCancel={() => respond?.("Email sending cancelled by user.")}
                 />
             );
         },

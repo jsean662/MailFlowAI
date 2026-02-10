@@ -12,6 +12,7 @@ import { Notification as AppNotification } from './Notification';
 import { useCopilotIntegration } from '../../copilot/copilotContext';
 import { CopilotPopup } from "@copilotkit/react-ui";
 
+import { CopilotProcessingIndicator } from '../copilot/CopilotProcessingIndicator';
 export const AppLayout: React.FC = () => {
     useCopilotIntegration(); // Activate Copilot AI Actions
     const navigate = useNavigate();
@@ -106,6 +107,7 @@ export const AppLayout: React.FC = () => {
                             initial: "Hi! How can I help you with your email today?",
                         }}
                     />
+                    <CopilotProcessingIndicator />
                 </div>
             </main>
         </div>

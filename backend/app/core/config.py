@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Mail Assistant Backend"
+    PROJECT_NAME: str = "MailFlowAI Backend"
     
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str

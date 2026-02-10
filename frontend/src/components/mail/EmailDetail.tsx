@@ -104,7 +104,7 @@ export const EmailDetail: React.FC = () => {
                         )}
 
                         <textarea
-                            className="w-full h-32 p-2 border-2 border-black mb-2"
+                            className="w-full h-32 p-2 border-2 border-black mb-2 resize-none"
                             placeholder="Type your message..."
                             value={body}
                             onChange={e => setBody(e.target.value)}

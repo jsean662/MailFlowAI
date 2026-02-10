@@ -23,6 +23,10 @@ interface UIState {
     openComposePage: () => void;
     replyToCurrentEmail: (email: any, additionalContent?: string) => void;
     forwardCurrentEmail: (email: any, additionalContent?: string, to?: string) => void;
+
+    // Copilot Processing State
+    isCopilotProcessing: boolean;
+    setCopilotProcessing: (isProcessing: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -103,4 +107,7 @@ export const useUIStore = create<UIState>((set, get) => ({
             navigationTarget: '/compose',
         });
     },
+
+    isCopilotProcessing: false,
+    setCopilotProcessing: (isProcessing) => set({ isCopilotProcessing: isProcessing }),
 }));

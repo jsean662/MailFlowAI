@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useUIStore } from '../store/uiStore';
 import { gmailApi } from '../api/gmailApi';
-import { Input, TextArea } from '../components/common/Input';
+import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { useNavigate } from 'react-router-dom';
 import { Send, Trash } from 'lucide-react';
 import { useMailStore } from '../store/mailStore';
+
 
 export const ComposePage: React.FC = () => {
     const { composeDraft, updateDraft, clearDraft } = useUIStore();
@@ -68,14 +69,18 @@ export const ComposePage: React.FC = () => {
                     onChange={(e) => updateDraft({ subject: e.target.value })}
                 />
 
-                <TextArea
-                    label="Message"
-                    placeholder="Type your message here..."
-                    rows={12}
-                    value={composeDraft.body}
-                    onChange={(e) => updateDraft({ body: e.target.value })}
-                    className="font-mono text-sm leading-relaxed"
-                />
+                <div className="flex flex-col">
+                    <label className="mb-1 text-sm font-bold uppercase tracking-wider text-black dark:text-off-white">
+                        Message
+                    </label>
+                    <textarea
+                        placeholder="Type your message here..."
+                        rows={12}
+                        value={composeDraft.body}
+                        onChange={(e) => updateDraft({ body: e.target.value })}
+                        className="w-full p-2 bg-white dark:bg-zinc-800 text-black dark:text-off-white font-sans border-2 border-black focus:outline-none focus:shadow-brutal transition-all placeholder:text-gray-500 font-mono text-sm leading-relaxed resize-none"
+                    />
+                </div>
 
                 <div className="flex justify-between pt-6 border-t-2 border-gray-100 mt-8">
                     <Button

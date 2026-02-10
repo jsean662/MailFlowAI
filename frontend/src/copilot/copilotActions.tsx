@@ -10,7 +10,8 @@ export function useCopilotActions() {
         setComposeDraft,
         openComposePage,
         clearDraft,
-        setNavigationTarget
+        setNavigationTarget,
+        setCopilotProcessing
     } = useUIStore();
 
     const {
@@ -59,9 +60,14 @@ export function useCopilotActions() {
             }
         ],
         handler: async ({ to, subject, body }) => {
-            setComposeDraft({ to, subject, body });
-            openComposePage();
-            return "Compose window opened with draft.";
+            try {
+                setCopilotProcessing(true);
+                setComposeDraft({ to, subject, body });
+                openComposePage();
+                return "Compose window opened with draft.";
+            } finally {
+                setCopilotProcessing(false);
+            }
         },
     });
 
@@ -80,24 +86,29 @@ export function useCopilotActions() {
                     subject={currentDraft.subject}
                     body={currentDraft.body}
                     onConfirm={async () => {
-                        if (!currentDraft.to || !currentDraft.subject) {
-                            respond?.("Error: Draft incomplete.");
-                            return;
-                        }
-
                         try {
-                            await gmailApi.sendEmail({
-                                to: currentDraft.to.split(',').map((e: string) => e.trim()),
-                                subject: currentDraft.subject,
-                                body: currentDraft.body
-                            });
+                            setCopilotProcessing(true);
+                            if (!currentDraft.to || !currentDraft.subject) {
+                                respond?.("Error: Draft incomplete.");
+                                return;
+                            }
 
-                            clearDraft();
-                            setNavigationTarget('/sent');
-                            respond?.("Email sent successfully.");
-                        } catch (error) {
-                            console.error("Failed to send email:", error);
-                            respond?.("Failed to send email. Please try again.");
+                            try {
+                                await gmailApi.sendEmail({
+                                    to: currentDraft.to.split(',').map((e: string) => e.trim()),
+                                    subject: currentDraft.subject,
+                                    body: currentDraft.body
+                                });
+
+                                clearDraft();
+                                setNavigationTarget('/sent');
+                                respond?.("Email sent successfully.");
+                            } catch (error) {
+                                console.error("Failed to send email:", error);
+                                respond?.("Failed to send email. Please try again.");
+                            }
+                        } finally {
+                            setCopilotProcessing(false);
                         }
                     }}
                     onCancel={() => respond?.("Email sending cancelled by user.")}
@@ -106,23 +117,97 @@ export function useCopilotActions() {
         },
     });
 
-    // 3. Search Emails
+    // 3. Search Emails (Improved)
     useCopilotAction({
         name: "search_emails",
-        description: "Search for emails in the inbox using a query string.",
+        description: `
+        Search emails using structured filters AND/OR free text. 
+        Update the UI filters so the user sees what is being searched.
+        If the user provides a complex query that doesn't fit the slots, put it in 'keyword'.
+        `,
         parameters: [
             {
-                name: "query",
+                name: "keyword",
                 type: "string",
-                description: "The search query (e.g., 'from:john', 'subject:meeting')",
-                required: true
-            }
+                description: "Free text keyword OR raw Gmail query (e.g. 'category:updates'). Content to search in subject/body.",
+                required: false,
+            },
+            {
+                name: "from",
+                type: "string",
+                description: "Filter emails by sender email or name.",
+                required: false,
+            },
+            {
+                name: "dateWithinDays",
+                type: "number",
+                description: "Only show emails from the last N days (e.g., 7, 10, 30).",
+                required: false,
+            },
+            {
+                name: "status",
+                type: "string",
+                description: "Email read status filter: 'all', 'unread', or 'read'.",
+                required: false,
+            },
+            {
+                name: "hasAttachment",
+                type: "boolean",
+                description: "If true, only show emails that contain attachments.",
+                required: false,
+            },
         ],
-        handler: async ({ query }) => {
-            await storeSearchEmails(query);
-            // Ensure we are on the inbox page to see results
-            setNavigationTarget('/inbox');
-            return `Search completed for '${query}'. Results shown in Inbox.`;
+
+        handler: async ({
+            keyword,
+            from,
+            dateWithinDays,
+            status = "all",
+            hasAttachment = false,
+        }) => {
+            try {
+                setCopilotProcessing(true);
+                // 1. Build Gmail query (for API)
+                const queryParts: string[] = [];
+
+                if (keyword && keyword.trim().length > 0) queryParts.push(keyword.trim());
+                if (from && from.trim().length > 0) queryParts.push(`from:${from.trim()}`);
+                if (dateWithinDays && dateWithinDays > 0) queryParts.push(`newer_than:${dateWithinDays}d`);
+                if (status === "unread") queryParts.push("is:unread");
+                else if (status === "read") queryParts.push("is:read");
+                if (hasAttachment) queryParts.push("has:attachment");
+
+                const finalQuery = queryParts.join(" ").trim();
+                console.log("🔍 Copilot Search Query:", finalQuery);
+
+                // 2. Update UI Filters (for visibility)
+                // We map the copilot params to the store's filter state
+                setFilters({
+                    keyword: keyword || '',
+                    sender: from || '',
+                    // If dateWithinDays is set, we map it to a duration string for the UI like '7d'
+                    dateRange: dateWithinDays ? `${dateWithinDays}d` : 'all',
+                    readStatus: (status as 'all' | 'read' | 'unread') || 'all',
+                    hasAttachment: !!hasAttachment
+                });
+
+                // 3. Execute Search
+                if (finalQuery) {
+                    await storeSearchEmails(finalQuery);
+                } else {
+                    // If no query, maybe just clearing filters?
+                    // But usually this action implies a search.
+                    // We'll just search using the applied filters which might be empty => list all.
+                    await applySearchAndFilters();
+                }
+
+                // 4. Navigate to Inbox
+                setNavigationTarget("/inbox");
+
+                return `Showing results for: "${finalQuery || 'all emails'}"`;
+            } finally {
+                setCopilotProcessing(false);
+            }
         },
     });
 
@@ -139,16 +224,21 @@ export function useCopilotActions() {
             }
         ],
         handler: async ({ searchCriteria }) => {
-            // Find the email ID first
-            const results = await gmailApi.searchEmails(searchCriteria);
+            try {
+                setCopilotProcessing(true);
+                // Find the email ID first
+                const results = await gmailApi.searchEmails(searchCriteria);
 
-            if (results && results.length > 0) {
-                const bestMatch = results[0];
-                await openEmail(bestMatch.id);
-                setNavigationTarget(`/email/${bestMatch.id}`);
-                return `Opened email from ${bestMatch.sender}: ${bestMatch.subject}`;
-            } else {
-                return "No matching email found.";
+                if (results && results.length > 0) {
+                    const bestMatch = results[0];
+                    await openEmail(bestMatch.id);
+                    setNavigationTarget(`/email/${bestMatch.id}`);
+                    return `Opened email from ${bestMatch.sender}: ${bestMatch.subject}`;
+                } else {
+                    return "No matching email found.";
+                }
+            } finally {
+                setCopilotProcessing(false);
             }
         },
     });
@@ -166,12 +256,17 @@ export function useCopilotActions() {
             }
         ],
         handler: async ({ responseContent }) => {
-            const current = useMailStore.getState().selectedEmail;
-            if (!current) {
-                return "No email is currently open to reply to.";
+            try {
+                setCopilotProcessing(true);
+                const current = useMailStore.getState().selectedEmail;
+                if (!current) {
+                    return "No email is currently open to reply to.";
+                }
+                useUIStore.getState().replyToCurrentEmail(current, responseContent);
+                return "Reply draft created.";
+            } finally {
+                setCopilotProcessing(false);
             }
-            useUIStore.getState().replyToCurrentEmail(current, responseContent);
-            return "Reply draft created.";
         },
     });
 
@@ -194,71 +289,18 @@ export function useCopilotActions() {
             }
         ],
         handler: async ({ to, message }) => {
-            const current = useMailStore.getState().selectedEmail;
-            if (!current) {
-                return "No email is currently open to forward.";
+            try {
+                setCopilotProcessing(true);
+                const current = useMailStore.getState().selectedEmail;
+                if (!current) {
+                    return "No email is currently open to forward.";
+                }
+                useUIStore.getState().forwardCurrentEmail(current, message, to);
+                return "Forward draft created.";
+            } finally {
+                setCopilotProcessing(false);
             }
-            useUIStore.getState().forwardCurrentEmail(current, message, to);
-            return "Forward draft created.";
         },
     });
 
-    // 6. Filter Inbox
-    useCopilotAction({
-        name: "filter_inbox",
-        description: "Filter the inbox view. Usage: User can specify a duration (e.g. '3 days') and optionally a start date. If the user specifies a duration NOT in {1d, 3d, 7d, 14d, 1m, 2m, 6m, 1y} (e.g. '4 days'), you MUST explain that only specific durations are allowed and ask them to choose one, DO NOT guess.",
-        parameters: [
-            {
-                name: "readStatus",
-                type: "string",
-                description: "'read', 'unread', or 'all'",
-            },
-            {
-                name: "dateRange",
-                type: "string",
-                description: "Duration of the filter starting from the startDate. Examples: '1d', '3d', '4d', '7d', '14d', '1m', '2m'. Defaults to '1d' if not specified.",
-            },
-            {
-                name: "startDate",
-                type: "string",
-                description: "The start date for the filter in YYYY/MM/DD format. Defaults to today if not specified.",
-            },
-            {
-                name: "sender",
-                type: "string",
-                description: "Sender email address or name",
-            },
-            {
-                name: "keyword",
-                type: "string",
-                description: "Keyword to search for",
-            },
-            {
-                name: "hasAttachment",
-                type: "boolean",
-                description: "Filter by having attachment",
-            }
-        ],
-        handler: async ({ readStatus, dateRange, startDate, sender, keyword, hasAttachment }) => {
-            const currentFilters = useMailStore.getState().filters;
-
-            // Construct new filters
-            const newFilters = {
-                ...currentFilters,
-                ...(readStatus && { readStatus: readStatus as any }),
-                ...(dateRange && { dateRange: dateRange as any }),
-                ...(startDate && { dateCenter: startDate }), // Map startDate to dateCenter
-                ...(sender && { sender }),
-                ...(keyword && { keyword }),
-                ...(hasAttachment !== undefined && { hasAttachment })
-            };
-
-            setFilters(newFilters);
-            await applySearchAndFilters();
-
-            // Ensure we are on the inbox page to see results
-            setNavigationTarget('/inbox');
-            return "Inbox filtered and displayed.";
-        },
-    });
 }

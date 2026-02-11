@@ -10,7 +10,15 @@ from starlette.middleware.sessions import SessionMiddleware
 app = FastAPI(title=settings.PROJECT_NAME)
 
 # Add Session Middleware
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+session_config = {"secret_key": settings.SECRET_KEY}
+if settings.FRONTEND_URL.startswith("https://"):
+    session_config["same_site"] = "none"
+    session_config["https_only"] = True
+else:
+    session_config["same_site"] = "lax"
+    session_config["https_only"] = False
+
+app.add_middleware(SessionMiddleware, **session_config)
 
 # Set up CORS
 app.add_middleware(

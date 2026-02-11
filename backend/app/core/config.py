@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     FRONTEND_URL: str
     
-    DATABASE_URL: str
+    DATABASE_URL: str = "sqlite:///./dev.db"
     
     class Config:
         env_file = ".env"

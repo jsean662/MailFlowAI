@@ -21,7 +21,7 @@ class TokenService:
             token_entry.access_token = access_token
             # Only update refresh token if a new one is provided
             if refresh_token:
-               token_entry.refresh_token = refresh_token
+                token_entry.refresh_token = refresh_token
             token_entry.expiry = expiry
         
         db.commit()

@@ -8,6 +8,8 @@ import { Send, Trash } from 'lucide-react';
 import { useMailStore } from '../store/mailStore';
 
 
+import { PageMeta } from '../components/common/PageMeta';
+
 export const ComposePage: React.FC = () => {
     const { composeDraft, updateDraft, clearDraft } = useUIStore();
     const { fetchSent, checkNewEmails } = useMailStore(); // To refresh sent folder
@@ -44,6 +46,7 @@ export const ComposePage: React.FC = () => {
 
     return (
         <div className="max-w-3xl mx-auto bg-white dark:bg-zinc-800 border-2 border-black p-8 shadow-brutal-lg">
+            <PageMeta title="Compose" />
             <h2 className="text-3xl font-display font-bold uppercase mb-8 border-b-2 border-black pb-4">
                 Compose Email
             </h2>

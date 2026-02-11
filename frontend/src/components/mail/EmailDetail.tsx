@@ -5,6 +5,7 @@ import { useMailStore } from '../../store/mailStore';
 import { Loader } from '../common/Loader';
 import { ArrowLeft, UserCircle, Calendar } from 'lucide-react';
 import { Button } from '../common/Button';
+import { PageMeta } from '../common/PageMeta';
 
 export const EmailDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -61,6 +62,7 @@ export const EmailDetail: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto animation-fade-in">
+            <PageMeta title={selectedEmail.subject} />
             {/* Header Actions */}
             <div className="mb-6 flex items-center justify-between">
                 <Button onClick={() => navigate(-1)} variant="secondary" size="sm" className="flex items-center gap-2">

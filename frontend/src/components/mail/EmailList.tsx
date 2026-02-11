@@ -100,7 +100,7 @@ export const EmailList: React.FC<EmailListProps> = ({ type }) => {
                                     className="px-6 py-2 bg-white text-black hover:bg-orange-500 hover:text-white disabled:hover:bg-white disabled:hover:text-black flex items-center group/btn"
                                 >
                                     <ArrowLeft size={16} className="mr-2 opacity-0 -translate-x-2 transition-all group-hover/btn:opacity-100 group-hover/btn:translate-x-0" />
-                                    <span>Previous</span>
+                                    <span>Prev</span>
                                 </Button>
 
                                 <div className="px-4 py-2 bg-black text-off-white font-display font-bold border-2 border-black transform min-w-[100px] text-center">

@@ -7,7 +7,7 @@ import { Menu, Mail } from 'lucide-react';
 import { gmailApi } from '../../api/gmailApi';
 import { Loader } from '../common/Loader';
 import type { UserProfile } from '../../types/user';
-import { ThemeToggle } from './ThemeToggle';
+
 import { Notification as AppNotification } from './Notification';
 import { useCopilotIntegration } from '../../copilot/copilotContext';
 import { CopilotPopup } from "@copilotkit/react-ui";
@@ -62,7 +62,7 @@ export const AppLayout: React.FC = () => {
     return (
         <div className="flex h-screen w-full bg-off-white dark:bg-zinc-900 md:border-l-3 md:border-black">
             {/* Mobile Header */}
-            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-off-white dark:bg-zinc-900 border-b-2 border-black flex items-center justify-between px-4 z-30 shadow-brutal-sm">
+            <header className="md:hidden fixed top-0 left-0 right-0 h-14 md:h-16 bg-off-white dark:bg-zinc-900 border-b-2 border-black flex items-center justify-between px-4 z-30 shadow-brutal-sm">
                 <div className="flex items-center gap-2">
                     <div className="bg-orange-500 p-1 border-2 border-black shadow-brutal-sm">
                         <Mail className="h-5 w-5 text-black" />
@@ -71,7 +71,7 @@ export const AppLayout: React.FC = () => {
                 </div>
                 <button
                     onClick={() => setSidebarOpen(true)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded border-2 border-transparent hover:border-black transition-all"
+                    className="p-2 active:scale-95 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded border-2 border-transparent hover:border-black transition-all"
                 >
                     <div className="md:hidden">
                         <Menu size={24} />
@@ -89,15 +89,12 @@ export const AppLayout: React.FC = () => {
                 />
             </div>
 
-            <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-8 md:px-6 pt-20 md:pt-8 bg-off-white dark:bg-zinc-900 relative">
+            <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-6 md:px-6 pt-20 md:pt-8 bg-off-white dark:bg-zinc-900 relative">
                 <div className="max-w-6xl mx-auto min-h-full">
                     <Outlet />
                 </div>
 
-                {/* Floating Theme Toggle - Moved to top right */}
-                <div className="fixed top-24 right-6 z-50 md:top-6">
-                    <ThemeToggle />
-                </div>
+
 
                 <div className="z-50 font-sans">
                     <CopilotPopup

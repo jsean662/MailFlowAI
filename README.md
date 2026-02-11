@@ -99,7 +99,7 @@ A focused view for reading and interacting with individual emails, with options 
 
 Watch MailFlowAI in action, showcasing the AI Copilot and seamless email management.
 
-<video src="https://www.loom.com/share/7ac37d82cdb4430f8116a8f3f451c430" width="600" controls></video>
+https://www.loom.com/share/7ac37d82cdb4430f8116a8f3f451c430
 
 
 ## ⚖️ Trade-offs & Future Improvements
@@ -135,4 +135,4 @@ Watch MailFlowAI in action, showcasing the AI Copilot and seamless email managem
 3.  Run dev server: `npm run dev`.
 
 ### Access
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [mailflow.ai](https://mailflowai.jsawant.com/login) in your browser.

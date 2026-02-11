@@ -16,6 +16,12 @@
   --border-width-3: 3px;
 }
 
+@layer utilities {
+  .bg-vignette {
+    background-image: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.15) 100%);
+  }
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {

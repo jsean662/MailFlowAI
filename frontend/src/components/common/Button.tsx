@@ -36,7 +36,7 @@ export const Button: React.FC<ButtonProps> = ({
             className={twMerge(
                 clsx(
                     // Base styles
-                    'font-display font-bold uppercase tracking-wider border-2 border-black transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none',
+                    'font-display font-bold uppercase tracking-wider border-2 border-black transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none select-none touch-manipulation',
                     // Variants
                     {
                         'bg-orange-500 text-black shadow-brutal hover:bg-orange-600': variant === 'primary',

@@ -9,6 +9,7 @@ import { useClickAnimation } from '../../hooks/useClickAnimation';
 import { Button } from '../common/Button';
 
 import { ConfirmationModal } from '../common/ConfirmationModal';
+import { ThemeToggle } from './ThemeToggle';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -63,8 +64,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
             />
 
             <aside className={clsx(
-                "fixed inset-y-0 left-0 z-50 w-64 bg-off-white dark:bg-zinc-900 border-r-3 border-black flex flex-col p-4 shadow-brutal-lg transition-transform duration-300 md:translate-x-0 md:relative md:h-full",
-                isOpen ? "translate-x-0" : "-translate-x-full"
+                "fixed inset-y-0 left-0 z-50 w-64 bg-off-white dark:bg-zinc-900 border-r-3 border-black flex flex-col p-4 transition-transform duration-300 md:translate-x-0 md:relative md:h-full md:shadow-brutal-lg",
+                isOpen ? "translate-x-0 shadow-brutal-lg" : "-translate-x-full shadow-none"
             )}>
                 {/* Header / Brand */}
                 <div className="flex items-center justify-between mb-8 px-2">
@@ -125,6 +126,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, userProfile }
 
                 {/* Footer */}
                 <div className="mt-auto space-y-3">
+                    {/* Theme Toggle */}
+                    <div className="px-2">
+                        <ThemeToggle />
+                    </div>
+
                     {/* User Profile */}
                     {userProfile && (
                         <div className="px-2 py-3 border-2 border-black bg-white dark:bg-zinc-800 shadow-brutal-sm">

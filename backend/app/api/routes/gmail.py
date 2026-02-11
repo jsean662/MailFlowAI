@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.services.token_service import TokenService
@@ -9,9 +9,16 @@ from app.core.cache import cache_response
 
 router = APIRouter()
 
-def get_gmail_service(db: Session = Depends(get_db)) -> GmailService:
-    tokens = TokenService.get_tokens(db)
+
+def get_gmail_service(request: Request, db: Session = Depends(get_db)) -> GmailService:
+    user_email = request.session.get("user")
+    if not user_email:
+        raise HTTPException(status_code=401, detail={"error": "AUTH_REQUIRED", "message": "User must login"})
+
+    tokens = TokenService.get_tokens(db, email=user_email)
     if not tokens:
+        # If tokens are missing for the user (e.g. cleared but session remains), force relogin
+        request.session.clear()
         raise HTTPException(status_code=401, detail={"error": "AUTH_REQUIRED", "message": "User must login again"})
     
     token_data = {

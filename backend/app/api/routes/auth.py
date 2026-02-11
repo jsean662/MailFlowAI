@@ -60,29 +60,50 @@ def callback(request: Request, code: str, db: Session = Depends(get_db)):
     flow.fetch_token(code=code)
     credentials = flow.credentials
     
+    try:
+        service = build('oauth2', 'v2', credentials=credentials)
+        user_info = service.userinfo().get().execute()
+        email = user_info.get('email')
+        if not email:
+             raise HTTPException(status_code=400, detail="Could not retrieve email from Google")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Failed to fetch user info: {str(e)}")
+
     # Calculate expiry
     expiry = credentials.expiry if credentials.expiry else datetime.utcnow() + timedelta(hours=1)
     
     TokenService.save_tokens(
         db, 
+        email=email,
         access_token=credentials.token, 
         refresh_token=credentials.refresh_token,
         expiry=expiry
     )
     
+    # Store user identity in session
+    request.session["user"] = email
+    
     return RedirectResponse(f"{settings.FRONTEND_URL}")
 
 
 @router.get("/status")
-def status(db: Session = Depends(get_db)):
-    tokens = TokenService.get_tokens(db)
+def status(request: Request, db: Session = Depends(get_db)):
+    user_email = request.session.get("user")
+    if not user_email:
+        return {"authenticated": False}
+        
+    tokens = TokenService.get_tokens(db, email=user_email)
     return {"authenticated": tokens is not None}
 
 
 @router.get("/me")
-def get_user_profile(db: Session = Depends(get_db)):
+def get_user_profile(request: Request, db: Session = Depends(get_db)):
     """Get the authenticated user's profile information."""
-    tokens = TokenService.get_tokens(db)
+    user_email = request.session.get("user")
+    if not user_email:
+        raise HTTPException(status_code=401, detail={"error": "AUTH_REQUIRED", "message": "User must login"})
+
+    tokens = TokenService.get_tokens(db, email=user_email)
     if not tokens:
         raise HTTPException(status_code=401, detail={"error": "AUTH_REQUIRED", "message": "User must login"})
     
@@ -109,6 +130,9 @@ def get_user_profile(db: Session = Depends(get_db)):
 
 
 @router.get("/logout")
-def logout(db: Session = Depends(get_db)):
-    TokenService.clear_tokens(db)
+def logout(request: Request, db: Session = Depends(get_db)):
+    user_email = request.session.get("user")
+    if user_email:
+        TokenService.clear_tokens(db, email=user_email)
+    request.session.clear()
     return {"message": "Logged out successfully"}

@@ -10,6 +10,9 @@ class GmailToken(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
+    # Email address of the user (unique identifier)
+    email = Column(String, unique=True, index=True, nullable=False)
+
     # Access token used for API calls, creating short-lived credentials
     access_token = Column(String, nullable=False)
     

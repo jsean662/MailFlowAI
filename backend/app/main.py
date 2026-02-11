@@ -5,7 +5,12 @@ from app.api.router import api_router
 from app.db.init_db import init_db
 import uvicorn
 
+from starlette.middleware.sessions import SessionMiddleware
+
 app = FastAPI(title=settings.PROJECT_NAME)
+
+# Add Session Middleware
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # Set up CORS
 app.add_middleware(

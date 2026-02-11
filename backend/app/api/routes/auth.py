@@ -36,7 +36,8 @@ def login():
     authorization_url, state = flow.authorization_url(
         access_type='offline',
         include_granted_scopes='true',
-        prompt='consent'
+        prompt='consent',
+        scopes=SCOPES
     )
     
     return RedirectResponse(authorization_url)
@@ -59,7 +60,6 @@ def callback(request: Request, code: str, db: Session = Depends(get_db)):
     
     flow.fetch_token(code=code)
     credentials = flow.credentials
-    
     try:
         service = build('oauth2', 'v2', credentials=credentials)
         user_info = service.userinfo().get().execute()

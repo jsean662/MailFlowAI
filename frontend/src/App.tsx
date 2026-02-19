@@ -7,13 +7,17 @@ import { ComposePage } from './pages/ComposePage';
 import { LoginPage } from './pages/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
 
-function App() {
+interface AppProps {
+  disableCopilot?: boolean;
+}
+
+function App({ disableCopilot = false }: AppProps) {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 
-        <Route path="/" element={<AppLayout />}>
+        <Route path="/" element={<AppLayout disableCopilot={disableCopilot} />}>
           <Route index element={<Navigate to="/inbox" replace />} />
           <Route path="inbox" element={<InboxPage />} />
           <Route path="sent" element={<SentPage />} />

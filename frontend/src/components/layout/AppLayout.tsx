@@ -13,8 +13,15 @@ import { useCopilotIntegration } from '../../copilot/copilotContext';
 import { CopilotPopup } from "@copilotkit/react-ui";
 
 import { CopilotProcessingIndicator } from '../copilot/CopilotProcessingIndicator';
-export const AppLayout: React.FC = () => {
-    useCopilotIntegration(); // Activate Copilot AI Actions
+
+interface AppLayoutProps {
+    disableCopilot?: boolean;
+}
+
+export const AppLayout: React.FC<AppLayoutProps> = ({ disableCopilot = false }) => {
+    if (!disableCopilot) {
+        useCopilotIntegration(); // Activate Copilot AI Actions
+    }
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -96,16 +103,18 @@ export const AppLayout: React.FC = () => {
 
 
 
-                <div className="z-50 font-sans">
-                    <CopilotPopup
-                        instructions="You are a helpful email assistant. Use the available tools to help the user manage their inbox."
-                        labels={{
-                            title: "MailFlow AI",
-                            initial: "Hi! How can I help you with your email today?",
-                        }}
-                    />
-                    <CopilotProcessingIndicator />
-                </div>
+                {!disableCopilot && (
+                    <div className="z-50 font-sans">
+                        <CopilotPopup
+                            instructions="You are a helpful email assistant. Use the available tools to help the user manage their inbox."
+                            labels={{
+                                title: "MailFlow AI",
+                                initial: "Hi! How can I help you with your email today?",
+                            }}
+                        />
+                        <CopilotProcessingIndicator />
+                    </div>
+                )}
             </main>
         </div>
     );

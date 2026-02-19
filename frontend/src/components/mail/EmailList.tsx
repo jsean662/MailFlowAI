@@ -43,7 +43,6 @@ export const EmailList: React.FC<EmailListProps> = ({ type }) => {
 
     useEffect(() => {
         if (!type) return;
-
         // Always fetch on mount if type is inbox to ensure we have fresh data and snapshot
         if (type === 'inbox' && !isLoading) fetchInbox();
         if (type === 'sent' && sentEmails.length === 0 && !isLoading) fetchSent();

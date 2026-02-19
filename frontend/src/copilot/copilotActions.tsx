@@ -1,25 +1,25 @@
 
-import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
-import { useUIStore } from "../store/uiStore";
+import { useCopilotReadable } from "@copilotkit/react-core";
+// import { useUIStore } from "../store/uiStore";
 import { useMailStore } from "../store/mailStore";
-import { gmailApi } from "../api/gmailApi";
-import { EmailConfirmation } from "../components/copilot/EmailConfirmation";
+// import { gmailApi } from "../api/gmailApi";
+// import { EmailConfirmation } from "../components/copilot/EmailConfirmation";
 
 export function useCopilotActions() {
-    const {
-        setComposeDraft,
-        openComposePage,
-        clearDraft,
-        setNavigationTarget,
-        setCopilotProcessing
-    } = useUIStore();
+    // const {
+    //     setComposeDraft,
+    //     openComposePage,
+    //     clearDraft,
+    //     setNavigationTarget,
+    //     setCopilotProcessing
+    // } = useUIStore();
 
-    const {
-        searchEmails: storeSearchEmails,
-        setFilters,
-        applySearchAndFilters,
-        openEmail
-    } = useMailStore();
+    // const {
+    //     searchEmails: storeSearchEmails,
+    //     setFilters,
+    //     applySearchAndFilters,
+    //     openEmail
+    // } = useMailStore();
 
     const { userProfile } = useMailStore();
 

@@ -1,5 +1,5 @@
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertCircle } from "lucide-react";
 import App from "../../App";
 
